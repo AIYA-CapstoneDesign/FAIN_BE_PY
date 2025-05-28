@@ -4,7 +4,7 @@ from app.api import router
 
 app = FastAPI (
     title = "RAG GPT API Server",
-    description="FastAPI + LangChain 기반 GPT RAG Server",
+    description="FastAPI + LangChain기반 GPT RAG Server",
     version="0.1.0",
     )
 
