@@ -9,14 +9,24 @@ api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key) #api_key를 인자로 넣어 인증해주고, OpenAI 클라이언트 초기화
 #client 객체로 GPT모델과의 모든 통신을 담당
 
-#question(문자열) 을 받아서 GPT에게 전달하고, 응답을 문자열로 반환하는 함수
-def ask_gpt(question: str) -> str:
-    response = client.chat.completions.create( #client 객체를 통해 GPT의 chat completion endpoint 호출
+def call_report_gpt(prompt: str) -> str:
+    response = client.chat.completions.create(
         model="gpt-4.1",
-        messages=[
-            {"role":"system","content":"당신은 유용한 AI 비서입니다."}, #system : gpt의 성격을 설정하는 안내 메세지
-            {"role":"user","content": question} #사용자의 실제 질문(question)
+        messages= [
+            {
+                "role":"system",
+                "content": "당신은 건강 분석 전문가입니다. 친절한 말투로 일반인이 알기 쉽게 리포트를 250자 이내, 1~2문장으로 간결하게 작성하세요. "
+
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text":prompt},
+                ]
+            }
         ],
-        temperature=0.7 #출력의 랜덤성을 조절하는 파라미터
+
+        temperature=0.7
     )
+    print("GPT 응답 원문:", response.choices[0].message.content)
     return response.choices[0].message.content #여러 choices중에서 첫번째 응답을 가져옴

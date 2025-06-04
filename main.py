@@ -1,11 +1,11 @@
 # FastAPI 앱 진입점
 from fastapi import FastAPI
-from app.api import router
+from app.api.fall_report_api import router
 
 app = FastAPI (
-    title = "RAG GPT API Server",
-    description="FastAPI + LangChain기반 GPT RAG Server",
-    version="0.1.0",
+    title = "Python GPT API Server",
+    description="FastAPI + LangChain기반 GPTServer",
+    version="1.0.0",
     )
 
 # router 등록
