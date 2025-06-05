@@ -3,12 +3,12 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from typing import List
 from datetime import date, datetime
-from app.gpt_client import call_report_gpt
+from app.gpt_client import call_month_report_gpt
 import json
 
 router = APIRouter() #이 모듈의 라우터(경로 모음)을 생성
 
-class ReportRequest(BaseModel):
+class MonthlyReportRequest(BaseModel):
     # 환자 기본정보
     name : str
     birth : date
@@ -18,41 +18,34 @@ class ReportRequest(BaseModel):
     disease : str
     allergic : str
 
-    # 리포트 정보
-    situationTime : datetime
+    # count정보
+    fallCount : int
+    hCount : int
+    pCount : int
+
 
     # 과거 리포트들
-    reportHistories : List[str]
+    monthlyReportHistories : List[str]
 
-
-
-@router.post("/report")
-async def get_report(request: ReportRequest):
-    reports = '\n'.join(['- ' + h for h in request.reportHistories])
+@router.post("/month")
+async def get_monthreport(request: MonthlyReportRequest):
+    monthreports = '\n'.join(['- ' + h for h in request.monthlyReportHistories])
     prompt = f"""
-             다음 정보를 바탕으로, 이러한 사람이 낙상시 어떤것 때문에 낙상했을지, 그렇다면 즉시 어떤 조치를 취해야할지 추론해줘
-             
-            조건:
-            1. 반드시 250자 이내.
-            2. 이름 "{request.name}"을 포함해 3인칭 존칭 사용.
-            3. 주변 환경은 언급하지 말 것.
-            4. 조치는 구체적이고 즉시 가능한 것으로 작성.
-            5. 기저질환, 복용약 두가지 관점에 대해서 모두 응답할 것.
-            6. 낙상의 요인이 될 수도 있다는 추상적인 말을 할 것.
-
-            형식:
-            [분석] 낙상 원인  
-            [조치] 즉시 필요한 조치
+            [리포트 형식]
+            {request.name}님은 이번 달 현재까지 {request.fallCount}번의 낙상이 있었습니다.
+            - 119 이송횟수와 자체조치횟수를 비교하여 판단하기
+            - 과거 리포트들과의 비교
+            - 기저질환과 알러지,약 정보를 바탕으로 생활습관과, 병원검진주기등 건강 조언을 해주기
 
             [환자 정보]
             이름: {request.name}, 생년월일: {request.birth}
             키/몸무게: {request.height}cm / {request.weight}kg
             기저질환: {request.disease}, 약: {request.medicine}, 알러지: {request.allergic}
-
-            [과거 리포트 참고]
-            {reports}
+            119이송횟수 : {request.hCount}, 자체조치횟수 : {request.pCount}
+            [과거 리포트 참고] : {monthreports}
                 """
-    result = call_report_gpt(prompt)
+    result = call_month_report_gpt(prompt)
+
     try:
         # 1차: result 자체가 JSON 문자열이라면 파싱
         parsed = json.loads(result)
@@ -71,9 +64,3 @@ async def get_report(request: ReportRequest):
     # 🎯 오직 순수 문자열만 Spring으로 넘김
     return report_text
     
-
-
-    
-
-
-

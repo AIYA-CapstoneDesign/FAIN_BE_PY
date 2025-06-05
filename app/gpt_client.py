@@ -30,3 +30,25 @@ def call_report_gpt(prompt: str) -> str:
     )
     print("GPT 응답 원문:", response.choices[0].message.content)
     return response.choices[0].message.content #여러 choices중에서 첫번째 응답을 가져옴
+
+def call_month_report_gpt(prompt: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4.1",
+        messages= [
+            {
+                "role":"system",
+                "content": "당신은 건강관리 조언전문가입니다. 친절한 말투로 일반인이 알기 쉽게 리포트를 500자 이내로 작성하세요. "
+
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text":prompt},
+                ]
+            }
+        ],
+
+        temperature=0.7
+    )
+    print("GPT 응답 원문:", response.choices[0].message.content)
+    return response.choices[0].message.content #여러 choices중에서 첫번째 응답을 가져옴
